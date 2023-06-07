@@ -79,6 +79,7 @@ pipeline {
                     switch (branchName) {
                         case 'dev':
                             namespace = namespaceDev
+                            echo "Dev environment case 1 : ${namespace}"
                             break
                         case 'qa':
                             namespace = namespaceQa
