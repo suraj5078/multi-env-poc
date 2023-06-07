@@ -67,7 +67,9 @@ pipeline {
                     sh "docker push ${registry}:${BUILD_NUMBER}"
                 }
             }
-   
+        }
+
+        stage('Helm Deploy') {
             steps {
                 script {
                     //def branchName = env.BRANCH_NAME
@@ -98,17 +100,16 @@ pipeline {
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
-                        echo "Dev environment : ${namespace}"      
-                        echo "registry : ${registry}"
-                        //sh '''
+                        echo " Dev environment : ${namespace}"                        
+                        sh '''
                             echo "namespace: ${namespace}"
-                            " helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}"
+                            helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                             kubectl get all -n ${namespace}
                             helm ls -n ${namespace}
                             kubectl get pods -n ${namespace}
                             kubectl get services -n ${namespace}
                             helm list -n ${namespace}
-                        //'''
+                        '''
                     }
                 }
             }
