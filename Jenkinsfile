@@ -61,11 +61,12 @@ pipeline {
                     }
                     dockerImage = docker.build registry
                     dockerImage.tag("$BUILD_NUMBER")
+                    env.finalregistry = "${registry}"
                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${registry}"
                     sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
                     sh "docker tag ${dockerImage.id} ${registry}:latest"
                     sh "docker push ${registry}:${BUILD_NUMBER}"
-                    env.finalregistry = "${registry}"
+                    sh "docker push ${registry}:latest"
                 }
             }
         }
@@ -104,7 +105,7 @@ pipeline {
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
-//                 sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:${BUILD_NUMBER}"
+                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:latest"
  //               sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry} --set image.tag=latest"
                 echo "Sleeping for 1 minute..."
                 // Sleep for 60 seconds (1 minute)
