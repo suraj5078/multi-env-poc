@@ -1,50 +1,112 @@
 pipeline {
     agent any
-
-    environment {
-        registry = "211223789150.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo"
+    
+    tools {
+        maven 'Maven3'
     }
+    
+    environment {
+        registryDev = "${env.REGISTRY_DEV}"
+        registryQa = "${env.REGISTRY_QA}"
+        registryUat = "${env.REGISTRY_UAT}"
+        registryProd = "${env.REGISTRY_PROD}"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Cloning Git') {
             steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/akannan1087/docker-spring-boot']])
+                // checkout([$class: 'GitSCM', branches: [[name: '*/dev'], [name: '*/qa'], [name: '*/uat'], [name: '*/prod']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/ayushimishra2601/docker-spring-boot']]])
+            
+                checkout scmGit(branches: [[name: '**']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/suraj5078/multi-env-poc.git']])
             }
         }
-        
-        stage ("Build JAR") {
+
+        stage('Build') {
             steps {
-                sh "mvn clean install"
+                sh 'mvn clean install'
             }
         }
-        
-        stage ("Build Image") {
+
+        // Building Docker images
+        // stage('Building image') {
+        //     steps {
+        //         script {
+        //             dockerImage = docker.build registry
+        //             dockerImage.tag("$BUILD_NUMBER")
+        //         }
+        //     }
+        // }
+
+        stage('Pushing to ECR') {
             steps {
                 script {
-                    docker.build registry
+                    def branchName = env.GIT_BRANCH
+                    // def branchName = env.BRANCH_NAME
+                    echo "Branch Name: ${branchName}"
+                    def registry
+
+                    switch (branchName) {
+                        case 'dev':
+                            registry = registryDev
+                            break
+                        case 'qa':
+                            registry = registryQa
+                            break
+                        case 'uat':
+                            registry = registryUat
+                            break
+                        case 'prod':
+                            registry = registryProd
+                            break
+                        default:
+                            echo "Invalid branch"
+                            return
+                    }
+                    dockerImage = docker.build registry
+                    dockerImage.tag("$BUILD_NUMBER")
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${registry}"
+                    sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
+                    sh "docker push ${registry}:${BUILD_NUMBER}"
                 }
             }
         }
-        
-        stage ("Push to ECR") {
+
+        stage('Helm Deploy') {
             steps {
                 script {
-                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 211223789150.dkr.ecr.us-east-1.amazonaws.com"
-                    sh "docker push 211223789150.dkr.ecr.us-east-1.amazonaws.com/my-docker-repo:latest"
-                    
+                    def branchName = env.BRANCH_NAME
+                    def namespace
+
+                    switch (branchName) {
+                        case 'dev':
+                            namespace = 'dev-namespace'
+                            break
+                        case 'qa':
+                            namespace = 'qa-namespace'
+                            break
+                        case 'uat':
+                            namespace = 'uat-namespace'
+                            break
+                        case 'prod':
+                            namespace = 'prod-namespace'
+                            break
+                        default:
+                            echo "Invalid branch"
+                            return
+                    }
+
+                    withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
+                        sh '''
+                            helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
+                            kubectl get all -n ${namespace}
+                            helm ls -n ${namespace}
+                            kubectl get pods -n ${namespace}
+                            kubectl get services -n ${namespace}
+                            helm list -n ${namespace}
+                        '''
+                    }
                 }
             }
         }
-        
-        stage ("Helm package") {
-            steps {
-                    sh "helm package springboot"
-                }
-            }
-                
-        stage ("Helm install") {
-            steps {
-                    sh "helm upgrade myrelease-21 springboot-0.1.0.tgz"
-                }
-            }
     }
 }
