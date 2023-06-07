@@ -65,7 +65,7 @@ pipeline {
                     sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
                     sh "docker tag ${dockerImage.id} ${registry}:latest"
                     sh "docker push ${registry}:${BUILD_NUMBER}"
-                    
+                    env.registry = registry
                 }
             }
         }
