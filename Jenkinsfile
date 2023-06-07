@@ -70,49 +70,43 @@ pipeline {
         }
 
         stage('Helm Deploy') {
-            steps {
-                script {
-                    //def branchName = env.BRANCH_NAME
-                    def branchName = env.GIT_BRANCH
-                    echo "Branch Name: ${branchName}"
+    steps {
+        script {
+            def branchName = env.GIT_BRANCH
+            echo "Branch Name: ${branchName}"
+            def namespace
 
-                    def namespace
-
-                    switch (branchName) {
-                        case 'dev':
-                            namespace = namespaceDev
-                            echo "Dev environment case 1 : ${namespace}"
-                            break
-                        case 'qa':
-                            namespace = namespaceQa
-                            break
-                        case 'uat':
-                            namespace = namespaceUat
-                            break
-                        case 'prod':
-                            namespace = namespaceProd
-                            break
-                        default:
-                            echo "Invalid branch"
-                            echo "Environment namespace is : ${namespace}"
-                            return
-                        
-                    }
-
-                    withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
-                        echo " Dev environment : ${namespace}"                        
-                        sh '''
-                            echo "namespace: ${namespace}"
-                            helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
-                            kubectl get all -n ${namespace}
-                            helm ls -n ${namespace}
-                            kubectl get pods -n ${namespace}
-                            kubectl get services -n ${namespace}
-                            helm list -n ${namespace}
-                        '''
-                    }
-                }
+            switch (branchName) {
+                case 'dev':
+                    namespace = namespaceDev
+                    break
+                case 'qa':
+                    namespace = namespaceQa
+                    break
+                case 'uat':
+                    namespace = namespaceUat
+                    break
+                case 'prod':
+                    namespace = namespaceProd
+                    break
+                default:
+                    echo "Invalid branch"
+                    echo "Environment namespace is: ${namespace}"
+                    return
             }
-        }
+
+            withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
+                echo "Environment namespace: ${namespace}"
+                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}"
+                sh "kubectl get all -n ${namespace}"
+                sh "helm ls -n ${namespace}"
+                sh "kubectl get pods -n ${namespace}"
+                sh "kubectl get services -n ${namespace}"
+                sh "helm list -n ${namespace}"
+            }
+          }
+       }
+     }
+
     }
 }
