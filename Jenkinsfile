@@ -98,12 +98,14 @@ pipeline {
 //             withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                 echo "Environment namespace: ${namespace}"
                 echo "Environment registry: ${finalregistry}"
+                echo "Environment registry: ${BUILD_NUMBER}"
                 sh "kubectl config get-contexts"
                 sh "aws eks update-kubeconfig --name POC-TEST --region us-east-1"
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
-                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:${BUILD_NUMBER}"
+//                 sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:${BUILD_NUMBER}"
+ //               sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry} --set image.tag=latest"
                 echo "Sleeping for 1 minute..."
                 // Sleep for 60 seconds (1 minute)
                 sleep(time: 60, unit: 'SECONDS')
