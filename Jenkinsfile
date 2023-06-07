@@ -105,7 +105,7 @@ pipeline {
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
-                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:latest"
+                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry} --set image.tag=latest"
  //               sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry} --set image.tag=latest"
                 echo "Sleeping for 1 minute..."
                 // Sleep for 60 seconds (1 minute)
