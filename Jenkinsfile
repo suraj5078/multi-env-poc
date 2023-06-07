@@ -91,13 +91,15 @@ pipeline {
                     break
                 default:
                     echo "Invalid branch"
-                    echo "Environment namespace is: ${namespace}"
                     return
             }
 
             withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                 echo "Environment namespace: ${namespace}"
-                helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
+                sh "kubectl get all -n ${namespace}"
+                sh "kubectl get all"
+                sh "kubectl get ns"
+                // helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                 sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}"
                 sh "kubectl get all -n ${namespace}"
                 sh "helm ls -n ${namespace}"
