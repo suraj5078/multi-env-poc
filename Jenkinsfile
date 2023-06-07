@@ -94,8 +94,10 @@ pipeline {
                     return
             }
 
-            withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
+//             withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                 echo "Environment namespace: ${namespace}"
+                sh "kubectl config get-contexts"
+                sh "aws eks update-kubeconfig --name POC-TEST --region us-east-1"
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
@@ -106,7 +108,7 @@ pipeline {
                 sh "kubectl get pods -n ${namespace}"
                 sh "kubectl get services -n ${namespace}"
                 sh "helm list -n ${namespace}"
-            }
+ //           }
           }
        }
      }
