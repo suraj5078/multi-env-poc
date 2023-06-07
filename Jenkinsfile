@@ -103,8 +103,11 @@ pipeline {
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
-                // helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                 sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:${BUILD_NUMBER}"
+                echo "Sleeping for 1 minute..."
+                // Sleep for 60 seconds (1 minute)
+                sleep(time: 60, unit: 'SECONDS')
+                echo "Finished sleeping."
                 sh "kubectl get all -n ${namespace}"
                 sh "helm ls -n ${namespace}"
                 sh "kubectl get pods -n ${namespace}"
@@ -114,6 +117,5 @@ pipeline {
           }
        }
      }
-
-    }
+   }
 }
