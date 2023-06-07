@@ -27,17 +27,7 @@ pipeline {
             }
         }
 
-        // Building Docker images
-        // stage('Building image') {
-        //     steps {
-        //         script {
-        //             dockerImage = docker.build registry
-        //             dockerImage.tag("$BUILD_NUMBER")
-        //         }
-        //     }
-        // }
-
-        stage('Pushing to ECR') {
+        stage('Build Docker image and Pushing to ECR') {
             steps {
                 script {
                     def branchName = env.GIT_BRANCH
@@ -67,6 +57,7 @@ pipeline {
                     dockerImage.tag("$BUILD_NUMBER")
                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${registry}"
                     sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
+                    sh "docker tag ${dockerImage.id} ${registry}:latest"
                     sh "docker push ${registry}:${BUILD_NUMBER}"
                 }
             }
@@ -84,10 +75,10 @@ pipeline {
 
                     switch (branchName) {
                         case 'dev':
-                            namespace = 'dev-namespace'
+                            namespace = "dev-namespace"
                             break
                         case 'qa':
-                            namespace = 'qa-namespace'
+                            namespace = "qa-namespace"
                             break
                         case 'uat':
                             namespace = 'uat-namespace'
