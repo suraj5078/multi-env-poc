@@ -108,6 +108,8 @@ pipeline {
                 // Sleep for 60 seconds (1 minute)
                 sleep(time: 60, unit: 'SECONDS')
                 echo "Finished sleeping."
+//                 export SERVICE_IP=$(kubectl get svc --namespace ${namespace} first-mychart --template "{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}")
+//                 echo http://$SERVICE_IP:80
                 sh "kubectl get all -n ${namespace}"
                 sh "helm ls -n ${namespace}"
                 sh "kubectl get pods -n ${namespace}"
