@@ -6,6 +6,8 @@ pipeline {
     }
     
     environment {
+        registry = ""
+        namespace = ""
         registryDev = "${env.REGISTRY_DEV}"
         registryQa = "${env.REGISTRY_QA}"
         registryUat = "${env.REGISTRY_UAT}"
@@ -92,7 +94,9 @@ pipeline {
                             break
                         default:
                             echo "Invalid branch"
+                            echo "Environment namespace is : ${namespace}"
                             return
+                        
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
