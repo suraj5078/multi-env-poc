@@ -10,6 +10,11 @@ pipeline {
         registryQa = "${env.REGISTRY_QA}"
         registryUat = "${env.REGISTRY_UAT}"
         registryProd = "${env.REGISTRY_PROD}"
+        namespaceDev = "${env.NAMESPACE_DEV}"
+        namespaceQa = "${env.NAMESPACE_QA}"
+        namespaceUat = "${env.NAMESPACE_UAT}"
+        namespaceProd = "${env.NAMESPACE_PROD}"
+
     }
 
     stages {
@@ -69,36 +74,33 @@ pipeline {
                     //def branchName = env.BRANCH_NAME
                     def branchName = env.GIT_BRANCH
                     echo "Branch Name: ${branchName}"
-                    echo "registry: ${registry}" 
 
                     def namespace
 
                     switch (branchName) {
                         case 'dev':
-                            namespace = "dev-namespace"
+                            namespace = NAMESPACE_DEV
                             break
                         case 'qa':
-                            namespace = "qa-namespace"
+                            namespace = NAMESPACE_QA
                             break
                         case 'uat':
-                            namespace = 'uat-namespace'
+                            namespace = NAMESPACE_UAT
                             break
                         case 'prod':
-                            namespace = 'prod-namespace'
+                            namespace = NAMESPACE_PROD
                             break
                         default:
                             echo "Invalid branch"
                             return
                         
                     echo "Branch Name: ${branchName}"
-                    echo "registry: ${registry}" 
                     echo "namespace: ${namespace}" 
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                         sh '''
                             echo "Branch Name: ${branchName}"
-                            echo "registry: ${registry}" 
                             echo "namespace: ${namespace}" 
                             helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                             kubectl get all -n ${namespace}
