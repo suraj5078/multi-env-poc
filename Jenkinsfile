@@ -14,14 +14,13 @@ pipeline {
         namespaceQa = "${env.NAMESPACE_QA}"
         namespaceUat = "${env.NAMESPACE_UAT}"
         namespaceProd = "${env.NAMESPACE_PROD}"
-
     }
 
     stages {
         stage('Cloning Git') {
             steps {
                 // checkout([$class: 'GitSCM', branches: [[name: '*/dev'], [name: '*/qa'], [name: '*/uat'], [name: '*/prod']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/ayushimishra2601/docker-spring-boot']]])
-            
+   
                 checkout scmGit(branches: [[name: '**']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/suraj5078/multi-env-poc.git']])
             }
         }
@@ -96,7 +95,7 @@ pipeline {
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
-                        sh ' echo "namespace: $namespace" '
+                        sh " echo "namespace: $namespace" "
                         sh '''
                             echo "namespace: ${namespace}"
                             helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
