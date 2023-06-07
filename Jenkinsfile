@@ -79,16 +79,16 @@ pipeline {
 
                     switch (branchName) {
                         case 'dev':
-                            namespace = NAMESPACE_DEV
+                            namespace = namespaceDev
                             break
                         case 'qa':
-                            namespace = NAMESPACE_QA
+                            namespace = namespaceQa
                             break
                         case 'uat':
-                            namespace = NAMESPACE_UAT
+                            namespace = namespaceUat
                             break
                         case 'prod':
-                            namespace = NAMESPACE_PROD
+                            namespace = namespaceProd
                             break
                         default:
                             echo "Invalid branch"
