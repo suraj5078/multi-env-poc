@@ -65,7 +65,7 @@ pipeline {
                     sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
                     sh "docker tag ${dockerImage.id} ${registry}:latest"
                     sh "docker push ${registry}:${BUILD_NUMBER}"
-                    env.mainregistry = "${registry}"
+                    env.finalregistry = "${registry}"
                 }
             }
         }
@@ -97,14 +97,14 @@ pipeline {
 
 //             withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                 echo "Environment namespace: ${namespace}"
-                echo "Environment registry: ${mainregistry}"
+                echo "Environment registry: ${finalregistry}"
                 sh "kubectl config get-contexts"
                 sh "aws eks update-kubeconfig --name POC-TEST --region us-east-1"
                 sh "kubectl get all -n ${namespace}"
                 sh "kubectl get all"
                 sh "kubectl get ns"
                 // helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
-                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}"
+                sh "helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${finalregistry}:${BUILD_NUMBER}"
                 sh "kubectl get all -n ${namespace}"
                 sh "helm ls -n ${namespace}"
                 sh "kubectl get pods -n ${namespace}"
