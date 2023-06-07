@@ -4,6 +4,7 @@ pipeline {
     tools {
         maven 'Maven3'
     }
+    
     environment {
         registry = ""
         namespace = ""
