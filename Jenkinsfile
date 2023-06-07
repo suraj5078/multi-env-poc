@@ -61,6 +61,7 @@ pipeline {
                         default:
                             echo "Invalid branch"
                             return
+     
                     }
                     dockerImage = docker.build registry
                     dockerImage.tag("$BUILD_NUMBER")
@@ -94,6 +95,10 @@ pipeline {
                         default:
                             echo "Invalid branch"
                             return
+                        
+                    echo "Branch Name: ${branchName}"
+                    echo "regsitry: ${registry}" 
+                    echo "regsitry: ${namespace}" 
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
