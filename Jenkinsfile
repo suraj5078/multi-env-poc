@@ -65,6 +65,7 @@ pipeline {
                     sh "docker tag ${dockerImage.id} ${registry}:${BUILD_NUMBER}"
                     sh "docker tag ${dockerImage.id} ${registry}:latest"
                     sh "docker push ${registry}:${BUILD_NUMBER}"
+                    
                 }
             }
         }
@@ -96,6 +97,7 @@ pipeline {
 
 //             withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                 echo "Environment namespace: ${namespace}"
+                echo "Environment registry: ${registry}"
                 sh "kubectl config get-contexts"
                 sh "aws eks update-kubeconfig --name POC-TEST --region us-east-1"
                 sh "kubectl get all -n ${namespace}"
