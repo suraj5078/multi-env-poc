@@ -77,6 +77,9 @@ pipeline {
                 script {
                     //def branchName = env.BRANCH_NAME
                     def branchName = env.GIT_BRANCH
+                    echo "Branch Name: ${branchName}"
+                    echo "registry: ${registry}" 
+
                     def namespace
 
                     switch (branchName) {
@@ -97,15 +100,15 @@ pipeline {
                             return
                         
                     echo "Branch Name: ${branchName}"
-                    echo "regsitry: ${registry}" 
-                    echo "regsitry: ${namespace}" 
+                    echo "registry: ${registry}" 
+                    echo "namespace: ${namespace}" 
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
                         sh '''
                             echo "Branch Name: ${branchName}"
-                            echo "regsitry: ${registry}" 
-                            echo "regsitry: ${namespace}" 
+                            echo "registry: ${registry}" 
+                            echo "namespace: ${namespace}" 
                             helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                             kubectl get all -n ${namespace}
                             helm ls -n ${namespace}
