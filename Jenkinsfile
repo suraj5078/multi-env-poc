@@ -96,8 +96,9 @@ pipeline {
                     }
 
                     withKubeConfig([credentialsId: 'POC-TEST-EKS', serverUrl: '']) {
-                        sh " echo "namespace: ${namespace}" "
+                        sh ' echo "namespace: ${namespace}" '
                         sh '''
+                            echo "namespace: ${namespace}"
                             helm upgrade first --install mychart --namespace ${namespace} --set image.repository=${registry}:${BUILD_NUMBER}
                             kubectl get all -n ${namespace}
                             helm ls -n ${namespace}
